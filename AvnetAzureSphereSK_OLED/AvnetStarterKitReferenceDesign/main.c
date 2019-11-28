@@ -249,7 +249,7 @@ static void SocketEventHandler(EventData *eventData)
 	{
 		uint32_t u32;
 		uint8_t u8[4];
-	} analog_data;
+	} analog_data, analog_data1;
 
 	int bytesReceived = recv(sockFd, rxBuf, sizeof(rxBuf), 0);
 
@@ -264,6 +264,12 @@ static void SocketEventHandler(EventData *eventData)
 		analog_data.u8[i] = rxBuf[i];
 	}
 
+	// Copy data from Rx buffer to analog_data union
+	for (int i = 0; i < sizeof(analog_data1); i++)
+	{
+		analog_data1.u8[i] = rxBuf[i+4];
+	}
+
 	// get voltage (2.5*adc_reading/4096)
 	// divide by 3650 (3.65 kohm) to get current (A)
 	// multiply by 1000000 to get uA
@@ -271,6 +277,11 @@ static void SocketEventHandler(EventData *eventData)
 	// divide by 0.5 to get Lux (based on incandescent light Fig. 1 datasheet)
 	// We can simplify the factors, but for demostration purpose it's OK
 	light_sensor = ((float)analog_data.u32*2.5/4095)*1000000 / (3650*0.1428);
+
+	double Temp = log((double) 10000.0 * (4095.0 / analog_data1.u32 - 1));		// determine resistance
+	Temp = 1 / (0.001129148 + (0.000234125 + (0.0000000876741 * Temp * Temp)) * Temp);
+	Temp = Temp - 273.15;            // Convert Kelvin to Celcius
+	temperature_sensor = (Temp * 9.0) / 5.0 + 32.0; 	// Convert Celcius to Fahrenheit
 
 	Log_Debug("Received %d bytes. ", bytesReceived);
 

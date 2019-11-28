@@ -63,6 +63,7 @@ typedef struct
 extern sensor_var sensor_data;
 extern network_var network_data;
 extern float light_sensor;
+extern float temperature_sensor;
 /*
 #define WIFICONFIG_SSID_MAX_LENGTH 20
 #define WIFICONFIG_BSSID_BUFFER_SIZE 20

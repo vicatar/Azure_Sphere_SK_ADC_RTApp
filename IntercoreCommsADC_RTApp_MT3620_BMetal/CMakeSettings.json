@@ -4,7 +4,7 @@
       "environment": "AzureSphere",
 
       "AzureSphereTargetApplicationRuntimeVersion": 2,
-      "AzureSphereTargetBetaApis": "Beta1905"
+      "AzureSphereTargetBetaApis": "3+Beta1909"
     }
   ],
   "configurations": [
@@ -30,7 +30,7 @@
           "value": "${env.AzureSphereTargetApplicationRuntimeVersion}"
         },
         {
-          "name": "AZURE_SPHERE_TARGET_BETA_APIS",
+          "name": "AZURE_SPHERE_TARGET_API_SET",
           "value": "${env.AzureSphereTargetBetaApis}"
         },
         {
@@ -61,7 +61,7 @@
           "value": "${env.AzureSphereTargetApplicationRuntimeVersion}"
         },
         {
-          "name": "AZURE_SPHERE_TARGET_BETA_APIS",
+          "name": "AZURE_SPHERE_TARGET_API_SET",
           "value": "${env.AzureSphereTargetBetaApis}"
         },
         {

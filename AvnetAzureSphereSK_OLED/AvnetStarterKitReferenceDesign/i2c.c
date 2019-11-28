@@ -60,6 +60,7 @@ static axis1bit16_t data_raw_temperature;
 static float acceleration_mg[3];
 static float angular_rate_dps[3];
 static float lsm6dsoTemperature_degC;
+static float lsm6dsoTemperature_degF;
 static float pressure_hPa;
 static float lps22hhTemperature_degC;
 
@@ -161,8 +162,9 @@ void AccelTimerEventHandler(EventData *eventData)
 		memset(data_raw_temperature.u8bit, 0x00, sizeof(int16_t));
 		lsm6dso_temperature_raw_get(&dev_ctx, data_raw_temperature.u8bit);
 		lsm6dsoTemperature_degC = lsm6dso_from_lsb_to_celsius(data_raw_temperature.i16bit);
+		lsm6dsoTemperature_degF = lsm6dsoTemperature_degC*9.0/5.0 + 32.0;
 
-		Log_Debug("LSM6DSO: Temperature1 [degC]: %.2f\r\n", lsm6dsoTemperature_degC);
+		Log_Debug("LSM6DSO: Temperature1 [degF]: %.2f\r\n", lsm6dsoTemperature_degF);
 	}
 
 	// Read the sensors on the lsm6dso device
@@ -210,6 +212,7 @@ void AccelTimerEventHandler(EventData *eventData)
 	altitude = 44330 * (1 - powf((pressure_hPa / 1013.25), 1 / 5.255));  // pressure altitude in meters
 
 	Log_Debug("ALSPT19: Ambient Light[Lux] : %.2f\r\n", light_sensor);
+	Log_Debug("Analog Temp: Ext Temperature[°C] : %.2f\r\n", temperature_sensor);
 
 	//// OLED
 	update_oled();
@@ -227,8 +230,11 @@ void AccelTimerEventHandler(EventData *eventData)
 			Log_Debug("ERROR: not enough memory to send telemetry");
 		}
 		
-		snprintf(pjsonBuffer, JSON_BUFFER_SIZE, "{\"gX\":\"%.2lf\", \"gY\":\"%.2lf\", \"gZ\":\"%.2lf\", \"aX\": \"%.2f\", \"aY\": \"%.2f\", \"aZ\": \"%.2f\", \"pressure\": \"%.2f\", \"light_intensity\": \"%.2f\", \"altitude\": \"%.2f\", \"temp\": \"%.2f\",  \"rssi\": \"%d\"}",
-			angular_rate_dps[0], angular_rate_dps[1], angular_rate_dps[2], acceleration_mg[0], acceleration_mg[1], acceleration_mg[2], pressure_hPa, light_sensor, altitude, lsm6dsoTemperature_degC, network_data.rssi);
+		snprintf(pjsonBuffer, JSON_BUFFER_SIZE, "{\"gX\":\"%.2lf\", \"gY\":\"%.2lf\", \"gZ\":\"%.2lf\", \"aX\": \"%.2f\", \"aY\": \"%.2f\", \"aZ\": \"%.2f\", \"pressure\": \"%.2f\", \"light_intensity\": \"%.2f\", \"altitude\": \"%.2f\", \"temp\": \"%.2f\", \"temp_int\": \"%.2f\", \"rssi\": \"%d\"}",
+			angular_rate_dps[0], angular_rate_dps[1], angular_rate_dps[2], acceleration_mg[0], acceleration_mg[1], acceleration_mg[2], pressure_hPa, light_sensor, altitude, temperature_sensor, lsm6dsoTemperature_degF, network_data.rssi);
+
+//		snprintf(pjsonBuffer, JSON_BUFFER_SIZE, "{\"gX\":\"%.2lf\", \"gY\":\"%.2lf\", \"gZ\":\"%.2lf\", \"aX\": \"%.2f\", \"aY\": \"%.2f\", \"aZ\": \"%.2f\", \"pressure\": \"%.2f\", \"light_intensity\": \"%.2f\", \"altitude\": \"%.2f\", \"temp\": \"%.2f\", \"rssi\": \"%d\"}",
+//			angular_rate_dps[0], angular_rate_dps[1], angular_rate_dps[2], acceleration_mg[0], acceleration_mg[1], acceleration_mg[2], pressure_hPa, light_sensor, altitude, temperature_sensor, network_data.rssi);
 
 		Log_Debug("\n[Info] Sending telemetry: %s\n", pjsonBuffer);
 		AzureIoT_SendMessage(pjsonBuffer);

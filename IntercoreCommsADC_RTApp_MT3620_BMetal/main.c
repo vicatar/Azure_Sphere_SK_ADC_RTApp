@@ -83,7 +83,7 @@ static _Noreturn void RTCoreMain(void)
 	{
 		uint32_t u32;
 		uint8_t u8[4];
-	} analog_data;
+	} analog_data, analog_data1;
 
     // SCB->VTOR = ExceptionVectorTable
     WriteReg32(SCB_BASE, 0x08, (uint32_t)ExceptionVectorTable);
@@ -175,6 +175,17 @@ static _Noreturn void RTCoreMain(void)
 		Uart_WriteStringPoll(" V");
 		Uart_WriteStringPoll("\r\n");
 
+		// Read ADC channel 1
+		analog_data1.u32 = ReadAdc(1);
+
+		mV = (analog_data1.u32 * 2500) / 0xFFF;
+		Uart_WriteStringPoll("ADC channel 1: ");
+		Uart_WriteIntegerPoll(mV / 1000);
+		Uart_WriteStringPoll(".");
+		Uart_WriteIntegerWidthPoll(mV % 1000, 3);
+		Uart_WriteStringPoll(" V");
+		Uart_WriteStringPoll("\r\n");
+
 		j = 0;
 		for (int i = payloadStart; i < payloadStart + 4; i++)
 		{
@@ -182,7 +193,14 @@ static _Noreturn void RTCoreMain(void)
 			buf[i] = analog_data.u8[j++];
 		}
 
+		j = 0;
+		for (int i = payloadStart + 4; i < payloadStart + 8; i++)
+		{
+			// Put ADC data to buffer
+			buf[i] = analog_data1.u8[j++];
+		}
+
 		// Send buffer to A7 Core
-        EnqueueData(inbound, outbound, sharedBufSize, buf, payloadStart + 4);
+        EnqueueData(inbound, outbound, sharedBufSize, buf, payloadStart + 8);
     }
 }

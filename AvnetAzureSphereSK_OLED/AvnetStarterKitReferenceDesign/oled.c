@@ -6,7 +6,7 @@
 #include "oled.h"
 #include <math.h>
 
-uint8_t oled_state = 0;
+uint8_t oled_state = 6;
 
 // Data of sensors (Acceleration, Gyro, Temperature, Presure)
 sensor_var sensor_data;
@@ -16,6 +16,9 @@ network_var network_data;
 
 // Data of light sensor
 float light_sensor;
+
+// Data of temperature sensor
+float temperature_sensor;
 
 // Altitude
 extern float altitude;
@@ -86,7 +89,8 @@ void update_oled()
 		break;
 		case 6:
 		{
-			update_other(light_sensor, 0, 0); 
+			float lsm6dsoTemperature_degF = sensor_data.lsm6dsoTemperature_degC * 9.0 / 5.0 + 32.0;
+			update_other(light_sensor, temperature_sensor, lsm6dsoTemperature_degF);
 		}
 		break;
 		case 7:
@@ -527,8 +531,8 @@ void update_other(float x, float y, float z)
 
 	// Strings for labels
 	uint8_t str_light[] = "Light:";
-	uint8_t str_tbd1[] = "TBD 1:";
-	uint8_t str_tbd2[] = "TBD 2:";
+	uint8_t str_tbd1[] = "TempEx:";
+	uint8_t str_tbd2[] = "TempInt:";
 
 	// Clear OLED buffer
 	clear_oled_buffer();
@@ -554,7 +558,7 @@ void update_other(float x, float y, float z)
 	// Draw the value of y
 	sd1306_draw_string(sizeof(str_tbd1) * 6, OLED_LINE_2_Y, string_data, FONT_SIZE_LINE, white_pixel);
 	// Draw the units of y
-	sd1306_draw_string(sizeof(str_tbd1) * 6 + (get_str_size(string_data) + 1) * 6, OLED_LINE_2_Y, "Units", FONT_SIZE_LINE, white_pixel);
+	sd1306_draw_string(sizeof(str_tbd1) * 6 + (get_str_size(string_data) + 1) * 6, OLED_LINE_2_Y, "°F", FONT_SIZE_LINE, white_pixel);
 
 	// Convert z value to string
 	ftoa(z, string_data, 2);
@@ -564,7 +568,7 @@ void update_other(float x, float y, float z)
 	// Draw the value of z
 	sd1306_draw_string(sizeof(str_tbd2) * 6, OLED_LINE_3_Y, string_data, FONT_SIZE_LINE, white_pixel);
 	// Draw the units of z
-	sd1306_draw_string(sizeof(str_tbd2) * 6 + (get_str_size(string_data) + 1) * 6, OLED_LINE_3_Y, "Units", FONT_SIZE_LINE, white_pixel);
+	sd1306_draw_string(sizeof(str_tbd2) * 6 + (get_str_size(string_data) + 1) * 6, OLED_LINE_3_Y, "°F", FONT_SIZE_LINE, white_pixel);
 
 	// Send the buffer to OLED RAM
 	sd1306_refresh();
