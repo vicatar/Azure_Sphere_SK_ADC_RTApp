@@ -1,5 +1,8 @@
 
-# Azure Sphere Starter Kit Advanced Tutorial
+# Azure Sphere Starter Kit Advanced Tutorial (Extended)
+
+Added the reading of ADC Channel 1.
+Set default screen to temperature output.
 
 The A7 and M4 applications here are based on C code from various sources:
 1) Avnet's Starter Kit Out-of-Box demo code 
